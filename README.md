@@ -4,7 +4,7 @@
 This is an experimental architecture leveraging convolution blocks with attention blocks to model both the short and long range dynamics of the input tokens. The flow is the following: x -> convolution block -> attn -> FFN
 
 # Install
-``
+`pip3 install --upgrade atc-torch`
 
 
 ## Usage

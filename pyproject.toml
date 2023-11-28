@@ -20,6 +20,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.9"
 ]
+packages = [
+    { include = "attnconv" },
+    { include = "attnconv/**/*.py" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
