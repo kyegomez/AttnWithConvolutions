@@ -1,4 +1,3 @@
-
 import torch
 from einops import rearrange
 from torch import einsum, nn
@@ -31,8 +30,8 @@ class RMSNorm(nn.Module):
 class ConvolutionLanguageBlock(nn.Module):
     """
     Convolutional block for language modeling.
-    
-    
+
+
 
     Args:
         in_channels: int
@@ -45,19 +44,20 @@ class ConvolutionLanguageBlock(nn.Module):
             Padding for the convolutional layer
         activation: str
             Activation function to use
-            
-    
+
+
     """
+
     def __init__(
         self,
         in_channels,
         out_channels,
         kernel_size,
         padding,
-        activation='gelu',
+        activation="gelu",
     ):
         super(ConvolutionLanguageBlock, self).__init__()
-        
+
         # Select the activation function
         if activation == "relu":
             self.activation = nn.ReLU()
@@ -65,7 +65,7 @@ class ConvolutionLanguageBlock(nn.Module):
             self.activation = nn.GELU()
         else:
             raise ValueError("Activation function must be either relu ")
-        
+
         # Define the convolutional layer
         self.conv1d = nn.Conv1d(
             in_channels,
@@ -73,17 +73,17 @@ class ConvolutionLanguageBlock(nn.Module):
             kernel_size,
             padding=padding,
         )
-        
+
         # Add BatchNorm
         self.batchnorm = nn.BatchNorm1d(out_channels)
-        
+
     def forward(self, x: torch.Tensor):
         # Convolution layer
         x = self.conv1d(x)
-        
+
         # Activation
         x = self.activation(x)
-        
+
         return x
 
 
@@ -217,22 +217,28 @@ class ParallelTransformerBlock(nn.Module):
 class Transformer(nn.Module):
     def __init__(
         self,
-        dim,
-        in_channels,
-        out_channels,
-        kernel_size,
-        padding,
+        dim: int,
         depth,
         heads,
-        dim_head,
+        dim_head: int,
         ff_mult=4,
     ):
         super().__init__()
         self.layers = nn.ModuleList([])
 
+        kernel_size = 3
+        padding = 1
+
         for _ in range(depth):
             self.layers.append(
-                ConvolutionLanguageBlock(in_channels, out_channels, kernel_size, padding),
+                ConvolutionLanguageBlock(
+                    in_channels=dim,
+                    out_channels=dim,
+                    kernel_size=kernel_size,
+                    padding=padding,
+                )
+            )
+            self.layers.append(
                 ParallelTransformerBlock(dim, dim_head, heads, ff_mult),
             )
 
@@ -243,6 +249,7 @@ class Transformer(nn.Module):
 
 
 # classes
+
 
 class ATCTransformer(nn.Module):
     def __init__(
@@ -257,7 +264,9 @@ class ATCTransformer(nn.Module):
         super().__init__()
         self.emb = nn.Embedding(num_tokens, dim)
 
-        self.transformer = Transformer(dim, depth, heads, dim_head, ff_mult)
+        self.transformer = Transformer(
+            dim=dim, depth=depth, heads=heads, dim_head=dim_head, ff_mult=ff_mult
+        )
 
         self.to_logits = nn.Sequential(RMSNorm(dim), nn.Linear(dim, num_tokens))
 
