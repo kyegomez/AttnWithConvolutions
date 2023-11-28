@@ -55,8 +55,15 @@ class ConvolutionLanguageBlock(nn.Module):
         kernel_size,
         padding,
         activation="gelu",
+        batchnorm: bool = False,
     ):
         super(ConvolutionLanguageBlock, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.padding = padding
+        self.activation = activation
+        self.batchnorm = batchnorm
 
         # Select the activation function
         if activation == "relu":
@@ -80,6 +87,10 @@ class ConvolutionLanguageBlock(nn.Module):
     def forward(self, x: torch.Tensor):
         # Convolution layer
         x = self.conv1d(x)
+        
+        # BatchNorm
+        if self.batchnorm:
+            x = self.batchnorm(x)
 
         # Activation
         x = self.activation(x)
