@@ -27,6 +27,9 @@ print(logits)
 
 ```
 
+# Training
+`python3 train.py`
+
 
 # License
 MIT
